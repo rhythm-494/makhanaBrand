@@ -1,4 +1,4 @@
-import sql, { testConnection } from '../lib/db'
+import sql from '../lib/db'
 import HeroSection from '../components/Hero/HeroSection'
 import ProductsSection from '../components/products/ProductsSection'
 
@@ -17,14 +17,22 @@ export default async function HomePage() {
   }
   
   try {
-    // Test connection first
-    
     console.log('Database connected successfully')
 
-    // Fetch data with individual try-catch blocks
+    // Fetch featured products with category names
     try {
       const products = await sql`
-        SELECT p.*, c.name as category_name 
+        SELECT 
+          p.id, 
+          p.name, 
+          p.description, 
+          p.price, 
+          p.stock_qty, 
+          p.image_url, 
+          p.weight, 
+          p.is_active,
+          p.created_at,
+          c.name as category_name 
         FROM Products p 
         LEFT JOIN Categories c ON p.category_id = c.id 
         WHERE p.is_active = true 
@@ -32,22 +40,33 @@ export default async function HomePage() {
         LIMIT 8
       `;
       featuredProducts = products || [];
+      console.log(`Fetched ${featuredProducts.length} products`);
     } catch (productError) {
       console.error('Error fetching products:', productError.message);
+      featuredProducts = [];
     }
 
+    // Fetch categories
     try {
       const cats = await sql`
-        SELECT * FROM Categories 
+        SELECT 
+          id, 
+          name, 
+          description, 
+          image_url,
+          created_at
+        FROM Categories 
         ORDER BY created_at ASC 
         LIMIT 6
       `;
       categories = cats || [];
+      console.log(`Fetched ${categories.length} categories`);
     } catch (categoryError) {
       console.error('Error fetching categories:', categoryError.message);
+      categories = [];
     }
 
-    // Fetch stats
+    // Fetch product count
     try {
       const productCount = await sql`
         SELECT COUNT(*)::int as count 
@@ -57,8 +76,10 @@ export default async function HomePage() {
       stats.totalProducts = parseInt(productCount[0]?.count) || 0;
     } catch (e) {
       console.log('Error fetching product count:', e.message);
+      stats.totalProducts = 0;
     }
 
+    // Fetch customer count
     try {
       const customerCount = await sql`
         SELECT COUNT(*)::int as count 
@@ -68,15 +89,18 @@ export default async function HomePage() {
       stats.totalCustomers = parseInt(customerCount[0]?.count) || 0;
     } catch (e) {
       console.log('Error fetching customer count:', e.message);
+      stats.totalCustomers = 0;
     }
 
+    // Fetch orders count
     try {
       const orderCount = await sql`
-        SELECT COUNT(*)::int as count FROM orders
+        SELECT COUNT(*)::int as count FROM Orders
       `;
       stats.totalOrders = parseInt(orderCount[0]?.count) || 0;
     } catch (e) {
-      console.log('Orders table might not exist yet:', e.message);
+      console.log('Error fetching order count (table might not exist):', e.message);
+      stats.totalOrders = 0;
     }
     
     console.log('Data fetched successfully:', {
@@ -111,7 +135,7 @@ export default async function HomePage() {
         subtitle="Discover our handpicked selection of the finest makhana varieties, sourced directly from Bihar&apos;s traditional farmers."
       />
       
-      {/* Rest of your sections remain the same */}
+      {/* Why Choose Us Section */}
       <section className="py-16 bg-green-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -149,6 +173,7 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Statistics Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -181,6 +206,7 @@ export default async function HomePage() {
         </div>
       </section>
       
+      {/* Call to Action Section */}
       <section className="py-16 bg-green-600 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Try Our Premium Makhana?</h2>
