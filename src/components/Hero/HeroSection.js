@@ -10,7 +10,7 @@ export default function HeroSection({ stats }) {
               Premium <span className="text-green-600">Makhana</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-              Healthy, crunchy, and natural lotus seeds directly from Bihar's finest farms.
+              Healthy, crunchy, and natural lotus seeds directly from Bihar&apos;s finest farms.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link 

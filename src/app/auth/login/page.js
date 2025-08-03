@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-black">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-green-600 mb-2">Makhana Store</h1>
@@ -15,7 +15,7 @@ export default function LoginPage() {
             Sign in to your account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <a
               href="/auth/signup"
               className="font-medium text-green-600 hover:text-green-500 transition-colors"
@@ -30,7 +30,6 @@ export default function LoginPage() {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <LoginForm />
           
-          {/* Additional Links */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -53,11 +52,10 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Business Info */}
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center text-sm text-gray-600">
           <p className="mb-2">
-            🌱 Premium Quality Makhana from Bihar's Finest Farms
+            🌱 Premium Quality Makhana from Bihar&apos;s Finest Farms
           </p>
           <p>
             Need help? Contact us at{' '}
