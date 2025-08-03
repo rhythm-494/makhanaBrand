@@ -1,8 +1,5 @@
 import HeroSection from '../components/Hero/HeroSection'
 import ProductsSection from '../components/products/ProductsSection'
-import CategoriesSection from '../components/categories/CategoriesSection'
-// import TestimonialsSection from '../components/testimonials/TestimonialsSection'
-// import NewsletterSection from '../components/newsletter/NewsletterSection'
 
 import { productService } from '../services/database/productService'
 import { categoryService } from '../services/database/categoryService'
@@ -89,70 +86,150 @@ export default async function HomePage() {
         }}
       />
       
-      {/* Featured Products Section */}
+      {/* Featured Products Section with Functional Category Filters */}
       <ProductsSection 
         products={featuredProducts} 
+        categories={categories}
         title="Our Premium Makhana Collection"
         subtitle="Discover our handpicked selection of the finest makhana varieties, sourced directly from Bihar&apos;s traditional farmers."
         showViewAll={true}
       />
 
-      {/* Categories Section */}
-      <CategoriesSection 
-        categories={categories}
-        title="Shop by Category"
-        subtitle="Explore our diverse range of makhana varieties"
-      />
-
-      {/* Trending Products Section */}
+      {/* Enhanced Categories Section */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Trending Now</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Shop by Category</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Explore our diverse range of makhana varieties, each carefully crafted for unique taste experiences
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <div className="text-6xl mb-4">🏷️</div>
+                <p className="text-gray-500 text-lg">Categories will be displayed here soon!</p>
+              </div>
+            ) : (
+              categories.map(category => (
+                <div key={category.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                  <div className="relative h-48 bg-gradient-to-br from-green-100 to-green-200 overflow-hidden">
+                    <img 
+                      src={category.image_url || '/images/category-placeholder.jpg'} 
+                      alt={category.name}
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                  
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold mb-2 text-gray-800">{category.name}</h3>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">{category.description}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                        {category.product_count || 0} products
+                      </span>
+                      <a 
+                        href={`/products?category=${category.id}`}
+                        className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                      >
+                        Shop Now
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Enhanced Trending Products Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">🔥 Trending Now</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Popular choices among our customers - limited stock available!
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trendingProducts.map(product => (
-              <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border relative">
-                {product.stock_qty < 20 && (
-                  <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded z-10">
-                    Only {product.stock_qty} left!
-                  </span>
-                )}
-                
-                <div className="relative h-48 bg-gray-200">
-                  <img 
-                    src={product.image_url || '/images/placeholder-makhana.jpg'} 
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2 text-gray-800">{product.name}</h3>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="text-2xl font-bold text-green-600">₹{product.price}</span>
-                    <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                      {product.weight}g
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="flex-1 bg-green-600 text-white py-2 px-4 rounded text-sm hover:bg-green-700 transition-colors">
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
+            {trendingProducts.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <div className="text-6xl mb-4">📈</div>
+                <p className="text-gray-500 text-lg">Trending products will appear here!</p>
               </div>
-            ))}
+            ) : (
+              trendingProducts.map(product => (
+                <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border group">
+                  {/* Stock indicator */}
+                  {product.stock_qty < 20 && product.stock_qty > 0 && (
+                    <span className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full z-10 animate-pulse">
+                      Only {product.stock_qty} left!
+                    </span>
+                  )}
+                  
+                  {product.stock_qty === 0 && (
+                    <span className="absolute top-3 right-3 bg-gray-500 text-white text-xs px-2 py-1 rounded-full z-10">
+                      Out of Stock
+                    </span>
+                  )}
+                  
+                  <div className="relative h-48 bg-gray-200 overflow-hidden">
+                    <img 
+                      src={product.image_url || '/images/placeholder-makhana.jpg'} 
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                  
+                  <div className="p-5">
+                    {/* Category badge */}
+                    {product.category_name && (
+                      <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full mb-2">
+                        {product.category_name}
+                      </span>
+                    )}
+                    
+                    <h3 className="font-semibold text-lg mb-2 text-gray-800 line-clamp-2 group-hover:text-green-600 transition-colors">
+                      {product.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+                    
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-2xl font-bold text-green-600">₹{product.price}</span>
+                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                        {product.weight}g
+                      </span>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <button 
+                        className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          product.stock_qty > 0 
+                            ? 'bg-green-600 text-white hover:bg-green-700 hover:shadow-md' 
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                        disabled={product.stock_qty === 0}
+                      >
+                        {product.stock_qty > 0 ? 'Add to Cart' : 'Out of Stock'}
+                      </button>
+                      <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-green-300 transition-colors">
+                        ❤️
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
       
-      {/* Why Choose Us Section */}
+      {/* Enhanced Why Choose Us Section */}
       <section className="py-16 bg-green-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -163,27 +240,27 @@ export default async function HomePage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-4xl mb-4">🌱</div>
-              <h3 className="text-lg font-semibold mb-2">100% Natural</h3>
-              <p className="text-gray-600 text-sm">No artificial preservatives or chemicals</p>
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+              <div className="text-5xl mb-4">🌱</div>
+              <h3 className="text-lg font-semibold mb-2 text-gray-800">100% Natural</h3>
+              <p className="text-gray-600 text-sm">No artificial preservatives or chemicals added</p>
             </div>
             
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-4xl mb-4">🚜</div>
-              <h3 className="text-lg font-semibold mb-2">Farm Fresh</h3>
-              <p className="text-gray-600 text-sm">Directly sourced from Bihar farmers</p>
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+              <div className="text-5xl mb-4">🚜</div>
+              <h3 className="text-lg font-semibold mb-2 text-gray-800">Farm Fresh</h3>
+              <p className="text-gray-600 text-sm">Directly sourced from Bihar&apos;s finest farmers</p>
             </div>
             
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-4xl mb-4">💪</div>
-              <h3 className="text-lg font-semibold mb-2">High Protein</h3>
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+              <div className="text-5xl mb-4">💪</div>
+              <h3 className="text-lg font-semibold mb-2 text-gray-800">High Protein</h3>
               <p className="text-gray-600 text-sm">Rich in protein and low in calories</p>
             </div>
             
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-4xl mb-4">🚚</div>
-              <h3 className="text-lg font-semibold mb-2">Fast Delivery</h3>
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+              <div className="text-5xl mb-4">🚚</div>
+              <h3 className="text-lg font-semibold mb-2 text-gray-800">Fast Delivery</h3>
               <p className="text-gray-600 text-sm">Quick delivery across India</p>
             </div>
           </div>
@@ -195,129 +272,162 @@ export default async function HomePage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">Our Numbers Speak</h2>
-            <p className="text-gray-600">Growing community of makhana lovers</p>
+            <p className="text-gray-600">Growing community of makhana lovers across India</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center p-6 bg-green-50 rounded-lg">
-              <div className="text-4xl font-bold text-green-600 mb-2">
+            <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="text-4xl font-bold text-green-600 mb-2 counter-animation">
                 {stats.totalProducts}+
               </div>
-              <p className="text-gray-600 font-medium">Premium Products</p>
+              <p className="text-gray-700 font-medium">Premium Products</p>
+              <p className="text-gray-500 text-xs mt-1">Varieties Available</p>
             </div>
             
-            <div className="text-center p-6 bg-green-50 rounded-lg">
-              <div className="text-4xl font-bold text-green-600 mb-2">
+            <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="text-4xl font-bold text-blue-600 mb-2 counter-animation">
                 {stats.totalCustomers}+
               </div>
-              <p className="text-gray-600 font-medium">Happy Customers</p>
+              <p className="text-gray-700 font-medium">Happy Customers</p>
+              <p className="text-gray-500 text-xs mt-1">Satisfied Buyers</p>
             </div>
             
-            <div className="text-center p-6 bg-green-50 rounded-lg">
-              <div className="text-4xl font-bold text-green-600 mb-2">
+            <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="text-4xl font-bold text-purple-600 mb-2 counter-animation">
                 {stats.totalOrders}+
               </div>
-              <p className="text-gray-600 font-medium">Orders Delivered</p>
+              <p className="text-gray-700 font-medium">Orders Delivered</p>
+              <p className="text-gray-500 text-xs mt-1">Successfully Completed</p>
             </div>
 
-            <div className="text-center p-6 bg-green-50 rounded-lg">
-              <div className="text-4xl font-bold text-green-600 mb-2">
+            <div className="text-center p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="text-4xl font-bold text-yellow-600 mb-2 counter-animation">
                 ₹{stats.totalRevenue.toLocaleString()}+
               </div>
-              <p className="text-gray-600 font-medium">Revenue Generated</p>
+              <p className="text-gray-700 font-medium">Revenue Generated</p>
+              <p className="text-gray-500 text-xs mt-1">Business Growth</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Enhanced Testimonials Section */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">What Our Customers Say</h2>
-            <p className="text-gray-600">Real feedback from our satisfied customers</p>
+            <p className="text-gray-600">Real feedback from our satisfied customers across India</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border-l-4 border-green-500">
               <div className="flex mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-yellow-400">⭐</span>
+                  <span key={i} className="text-yellow-400 text-lg">⭐</span>
                 ))}
               </div>
-              <p className="text-gray-600 mb-4">
-                &quot;Amazing quality makhana! Fresh, crunchy and so much better than store-bought ones. Will definitely order again!&quot;
+              <p className="text-gray-600 mb-4 italic">
+                &quot;Amazing quality makhana! Fresh, crunchy and so much better than store-bought ones. The packaging keeps them fresh for weeks. Will definitely order again!&quot;
               </p>
-              <p className="font-semibold text-gray-800">- Priya Sharma</p>
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-green-600 font-bold">P</span>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-800">Priya Sharma</p>
+                  <p className="text-gray-500 text-sm">Delhi</p>
+                </div>
+              </div>
             </div>
             
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border-l-4 border-blue-500">
               <div className="flex mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-yellow-400">⭐</span>
+                  <span key={i} className="text-yellow-400 text-lg">⭐</span>
                 ))}
               </div>
-              <p className="text-gray-600 mb-4">
-                &quot;Perfect snack for my fitness journey. High protein, low calories, and tastes fantastic!&quot;
+              <p className="text-gray-600 mb-4 italic">
+                &quot;Perfect snack for my fitness journey. High protein, low calories, and tastes fantastic! The masala flavor is my absolute favorite.&quot;
               </p>
-              <p className="font-semibold text-gray-800">- Rajesh Kumar</p>
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-blue-600 font-bold">R</span>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-800">Rajesh Kumar</p>
+                  <p className="text-gray-500 text-sm">Mumbai</p>
+                </div>
+              </div>
             </div>
             
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border-l-4 border-purple-500">
               <div className="flex mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-yellow-400">⭐</span>
+                  <span key={i} className="text-yellow-400 text-lg">⭐</span>
                 ))}
               </div>
-              <p className="text-gray-600 mb-4">
-                &quot;Love the variety of flavors! The masala makhana is my favorite. Great packaging and fast delivery.&quot;
+              <p className="text-gray-600 mb-4 italic">
+                &quot;Love the variety of flavors! Great packaging, fast delivery, and excellent customer service. My entire family enjoys these healthy snacks.&quot;
               </p>
-              <p className="font-semibold text-gray-800">- Anita Patel</p>
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-purple-600 font-bold">A</span>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-800">Anita Patel</p>
+                  <p className="text-gray-500 text-sm">Bangalore</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="py-16 bg-green-600 text-white">
+      {/* Newsletter Subscription Section */}
+      <section className="py-16 bg-gradient-to-r from-green-600 to-green-700 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Stay Updated with Our Latest Offers</h2>
           <p className="text-xl mb-8 opacity-90">
-            Subscribe to our newsletter and get exclusive deals on premium makhana
+            Subscribe to our newsletter and get exclusive deals, new product launches, and healthy recipes
           </p>
           
-          <div className="max-w-md mx-auto flex gap-4">
-            <input 
-              type="email" 
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-300"
-            />
-            <button className="bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-              Subscribe
-            </button>
+          <div className="max-w-md mx-auto">
+            <div className="flex gap-3">
+              <input 
+                type="email" 
+                placeholder="Enter your email address"
+                className="flex-1 px-4 py-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-300 placeholder-gray-500"
+              />
+              <button className="bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                Subscribe
+              </button>
+            </div>
+            <p className="text-sm mt-3 opacity-80">
+              Join 10,000+ subscribers • No spam, unsubscribe anytime
+            </p>
           </div>
         </div>
       </section>
       
-      {/* Call to Action Section */}
+      {/* Enhanced Call to Action Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-gray-800">Ready to Try Our Premium Makhana?</h2>
-          <p className="text-xl mb-8 text-gray-600">
-            Join thousands of satisfied customers who trust us for their healthy snacking needs.
+          <h2 className="text-4xl font-bold mb-4 text-gray-800">Ready to Try Our Premium Makhana?</h2>
+          <p className="text-xl mb-8 text-gray-600 max-w-3xl mx-auto">
+            Join thousands of satisfied customers who trust us for their healthy snacking needs. Experience the authentic taste of Bihar&apos;s finest makhana.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
               href="/products" 
-              className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+              className="bg-green-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-700 transition-all duration-200 hover:shadow-lg transform hover:-translate-y-1"
             >
-              Shop All Products
+              🛍️ Shop All Products
             </a>
             <a 
               href="/contact" 
-              className="border-2 border-green-600 text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-green-600 hover:text-white transition-colors"
+              className="border-2 border-green-600 text-green-600 px-8 py-4 rounded-lg font-semibold hover:bg-green-600 hover:text-white transition-all duration-200"
             >
-              Contact Us
+              📞 Contact Us
             </a>
           </div>
         </div>
