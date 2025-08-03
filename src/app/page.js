@@ -1,8 +1,7 @@
-import pool from '../lib/db'
+import sql, { testConnection } from '../lib/db'
 import HeroSection from '../components/Hero/HeroSection'
 import ProductsSection from '../components/products/ProductsSection'
 
-// Metadata for the homepage
 export const metadata = {
   title: 'Home - Makhana Store | Premium Quality Natural Snacks',
   description: 'Welcome to Makhana Store. Discover premium quality makhana directly from Bihar\'s finest farms. Healthy, crunchy, and natural lotus seeds with no preservatives.',
@@ -18,48 +17,89 @@ export default async function HomePage() {
   }
   
   try {
-    // Fetch featured products from database
-    const { rows: products } = await pool.query(
-      `SELECT p.*, c.name as category_name 
-       FROM products p 
-       LEFT JOIN categories c ON p.category_id = c.id 
-       WHERE p.is_active = true 
-       ORDER BY p.created_at DESC 
-       LIMIT 8`
-    )
-    
-    // Fetch categories from database
-    const { rows: cats } = await pool.query(
-      'SELECT * FROM categories ORDER BY created_at ASC LIMIT 6'
-    )
-    
-    // Fetch some stats for display
-    const { rows: productCount } = await pool.query(
-      'SELECT COUNT(*) as count FROM products WHERE is_active = true'
-    )
-    
-    const { rows: customerCount } = await pool.query(
-      'SELECT COUNT(*) as count FROM users WHERE role = $1',
-      ['customer']
-    )
-    
-    const { rows: orderCount } = await pool.query(
-      'SELECT COUNT(*) as count FROM orders'
-    )
-    
-    featuredProducts = products
-    categories = cats
-    stats = {
-      totalProducts: productCount[0]?.count || 0,
-      totalCustomers: customerCount[0]?.count || 0,
-      totalOrders: orderCount[0]?.count || 0
+    // Test connection first
+    const connectionTest = await testConnection();
+    if (!connectionTest) {
+      throw new Error('Database connection test failed');
+    }
+
+    console.log('Database connected successfully')
+
+    // Fetch data with individual try-catch blocks
+    try {
+      const products = await sql`
+        SELECT p.*, c.name as category_name 
+        FROM Products p 
+        LEFT JOIN Categories c ON p.category_id = c.id 
+        WHERE p.is_active = true 
+        ORDER BY p.created_at DESC 
+        LIMIT 8
+      `;
+      featuredProducts = products || [];
+    } catch (productError) {
+      console.error('Error fetching products:', productError.message);
+    }
+
+    try {
+      const cats = await sql`
+        SELECT * FROM Categories 
+        ORDER BY created_at ASC 
+        LIMIT 6
+      `;
+      categories = cats || [];
+    } catch (categoryError) {
+      console.error('Error fetching categories:', categoryError.message);
+    }
+
+    // Fetch stats
+    try {
+      const productCount = await sql`
+        SELECT COUNT(*)::int as count 
+        FROM Products 
+        WHERE is_active = true
+      `;
+      stats.totalProducts = parseInt(productCount[0]?.count) || 0;
+    } catch (e) {
+      console.log('Error fetching product count:', e.message);
+    }
+
+    try {
+      const customerCount = await sql`
+        SELECT COUNT(*)::int as count 
+        FROM users 
+        WHERE role = 'customer'
+      `;
+      stats.totalCustomers = parseInt(customerCount[0]?.count) || 0;
+    } catch (e) {
+      console.log('Error fetching customer count:', e.message);
+    }
+
+    try {
+      const orderCount = await sql`
+        SELECT COUNT(*)::int as count FROM orders
+      `;
+      stats.totalOrders = parseInt(orderCount[0]?.count) || 0;
+    } catch (e) {
+      console.log('Orders table might not exist yet:', e.message);
     }
     
+    console.log('Data fetched successfully:', {
+      productsCount: featuredProducts.length,
+      categoriesCount: categories.length,
+      stats
+    })
+    
   } catch (error) {
-    console.error('Database error:', error)
+    console.error('Database error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    })
+    
     // Fallback to empty arrays if database fails
     featuredProducts = []
     categories = []
+    stats = { totalProducts: 0, totalCustomers: 0, totalOrders: 0 }
   }
 
   return (
@@ -72,10 +112,10 @@ export default async function HomePage() {
         products={featuredProducts} 
         categories={categories}
         title="Our Premium Makhana Collection"
-        subtitle="Discover our handpicked selection of the finest makhana varieties, sourced directly from Bihar's traditional farmers."
+        subtitle="Discover our handpicked selection of the finest makhana varieties, sourced directly from Bihar&apos;s traditional farmers."
       />
       
-      {/* Why Choose Us Section */}
+      {/* Rest of your sections remain the same */}
       <section className="py-16 bg-green-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -112,8 +152,39 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Our Numbers Speak</h2>
+            <p className="text-gray-600">Growing community of makhana lovers</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-green-600 mb-2">
+                {stats.totalProducts}+
+              </div>
+              <p className="text-gray-600">Premium Products</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="text-4xl font-bold text-green-600 mb-2">
+                {stats.totalCustomers}+
+              </div>
+              <p className="text-gray-600">Happy Customers</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="text-4xl font-bold text-green-600 mb-2">
+                {stats.totalOrders}+
+              </div>
+              <p className="text-gray-600">Orders Delivered</p>
+            </div>
+          </div>
+        </div>
+      </section>
       
-      {/* Call to Action Section */}
       <section className="py-16 bg-green-600 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Try Our Premium Makhana?</h2>

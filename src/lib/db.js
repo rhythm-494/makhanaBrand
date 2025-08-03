@@ -1,10 +1,21 @@
-import { Pool } from 'pg';
+import { neon } from '@neondatabase/serverless';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is not defined');
+}
 
-export default pool;
+const sql = neon(process.env.DATABASE_URL);
+
+// Test connection function
+export async function testConnection() {
+  try {
+    const result = await sql`SELECT 1 as test`;
+    console.log('✅ Database connection successful:', result);
+    return true;
+  } catch (error) {
+    console.error('❌ Database connection failed:', error);
+    return false;
+  }
+}
+
+export default sql;

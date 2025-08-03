@@ -1,15 +1,14 @@
-import pool from '../../lib/db'; 
+import sql from '../../../lib/db';
 
-export default async function handler(req, res) {
-  if (req.method === 'GET') {
-    try {
-      const { rows } = await pool.query('SELECT * FROM users');  
-      res.status(200).json(rows);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Database query failed' });
-    }
-  } else {
-    res.status(405).json({ message: 'Method not allowed' });
+export async function GET() {
+  try {
+    const users = await sql`SELECT * FROM users`;
+    return Response.json(users);
+  } catch (error) {
+    console.error('Database query failed:', error);
+    return Response.json(
+      { error: 'Database query failed' },
+      { status: 500 }
+    );
   }
 }
