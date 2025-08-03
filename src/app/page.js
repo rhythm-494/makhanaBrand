@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import HeroSection from '../components/Hero/HeroSection'
 import ProductsSection from '../components/products/ProductsSection'
 
@@ -115,10 +116,12 @@ export default async function HomePage() {
               categories.map(category => (
                 <div key={category.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                   <div className="relative h-48 bg-gradient-to-br from-green-100 to-green-200 overflow-hidden">
-                    <img 
+                    <Image 
                       src={category.image_url || '/images/category-placeholder.jpg'} 
                       alt={category.name}
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                      fill
+                      className="object-cover hover:scale-110 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
@@ -144,90 +147,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Enhanced Trending Products Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">🔥 Trending Now</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Popular choices among our customers - limited stock available!
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trendingProducts.length === 0 ? (
-              <div className="col-span-full text-center py-12">
-                <div className="text-6xl mb-4">📈</div>
-                <p className="text-gray-500 text-lg">Trending products will appear here!</p>
-              </div>
-            ) : (
-              trendingProducts.map(product => (
-                <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border group">
-                  {/* Stock indicator */}
-                  {product.stock_qty < 20 && product.stock_qty > 0 && (
-                    <span className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full z-10 animate-pulse">
-                      Only {product.stock_qty} left!
-                    </span>
-                  )}
-                  
-                  {product.stock_qty === 0 && (
-                    <span className="absolute top-3 right-3 bg-gray-500 text-white text-xs px-2 py-1 rounded-full z-10">
-                      Out of Stock
-                    </span>
-                  )}
-                  
-                  <div className="relative h-48 bg-gray-200 overflow-hidden">
-                    <img 
-                      src={product.image_url || '/images/placeholder-makhana.jpg'} 
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                  
-                  <div className="p-5">
-                    {/* Category badge */}
-                    {product.category_name && (
-                      <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full mb-2">
-                        {product.category_name}
-                      </span>
-                    )}
-                    
-                    <h3 className="font-semibold text-lg mb-2 text-gray-800 line-clamp-2 group-hover:text-green-600 transition-colors">
-                      {product.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-                    
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-2xl font-bold text-green-600">₹{product.price}</span>
-                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                        {product.weight}g
-                      </span>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <button 
-                        className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
-                          product.stock_qty > 0 
-                            ? 'bg-green-600 text-white hover:bg-green-700 hover:shadow-md' 
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        }`}
-                        disabled={product.stock_qty === 0}
-                      >
-                        {product.stock_qty > 0 ? 'Add to Cart' : 'Out of Stock'}
-                      </button>
-                      <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-green-300 transition-colors">
-                        ❤️
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
+ 
       
       {/* Enhanced Why Choose Us Section */}
       <section className="py-16 bg-green-50">

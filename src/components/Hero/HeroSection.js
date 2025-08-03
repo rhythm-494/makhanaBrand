@@ -1,6 +1,7 @@
 'use client'
+import Image from 'next/image'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 export default function HeroSection({ stats, recentActivity }) {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -11,19 +12,20 @@ export default function HeroSection({ stats, recentActivity }) {
     setIsVisible(true)
   }, [])
 
-  // Auto-slide testimonials
-  const testimonials = [
+  // Memoize testimonials to fix dependency warning
+  const testimonials = useMemo(() => [
     { text: "Best makhana I've ever tasted!", author: "Priya S." },
     { text: "Fresh from Bihar farms to my table", author: "Rajesh K." },
     { text: "Healthy snacking made delicious", author: "Anita P." }
-  ]
+  ], [])
 
+  // Auto-slide testimonials - Fixed dependency
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % testimonials.length)
     }, 3000)
     return () => clearInterval(timer)
-  }, [])
+  }, [testimonials.length])
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -113,7 +115,7 @@ export default function HeroSection({ stats, recentActivity }) {
                   ⭐⭐⭐⭐⭐
                 </div>
                 <div className="text-sm text-gray-600">
-                  "{testimonials[currentSlide].text}" - {testimonials[currentSlide].author}
+                  &quot;{testimonials[currentSlide].text}&quot; - {testimonials[currentSlide].author}
                 </div>
               </div>
               <div className="flex mt-2 space-x-1">
@@ -135,10 +137,13 @@ export default function HeroSection({ stats, recentActivity }) {
             {/* Main Product Image */}
             <div className="relative">
               <div className="relative w-full h-96 lg:h-[500px] bg-gradient-to-br from-green-100 to-green-200 rounded-3xl overflow-hidden shadow-2xl">
-                <img 
-                  src="/images/hero-makhana.jpg" 
+                <Image 
+                  src="/download.jpeg" 
                   alt="Premium Makhana Collection"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                  fill
+                  className="object-cover hover:scale-105 transition-transform duration-700"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 
                 {/* Floating Stats Cards */}

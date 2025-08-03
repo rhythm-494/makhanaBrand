@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import { useState, useMemo } from 'react'
 
 export default function ProductsSection({ products, categories, title, subtitle, showViewAll = false }) {
@@ -95,7 +96,7 @@ export default function ProductsSection({ products, categories, title, subtitle,
               ) : (
                 <>
                   <p className="text-gray-500 text-lg">
-                    No products found in "{categories.find(c => c.id.toString() === activeCategory)?.name}" category.
+                    No products found in &quot;{categories.find(c => c.id.toString() === activeCategory)?.name}&quot; category.
                   </p>
                   <button 
                     onClick={() => handleCategoryClick('all')}
@@ -111,10 +112,12 @@ export default function ProductsSection({ products, categories, title, subtitle,
               <div key={product.id} className="bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
                 {/* Product Image */}
                 <div className="relative h-48 bg-gray-200">
-                  <img 
+                  <Image 
                     src={product.image_url || '/images/placeholder-makhana.jpg'} 
                     alt={product.name || 'Makhana Product'}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-200"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   />
                   {product.stock_qty <= 5 && product.stock_qty > 0 && (
                     <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">

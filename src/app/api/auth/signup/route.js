@@ -1,4 +1,4 @@
-import pool from '../../../../lib/db'
+import sql from '../../../../lib/db'
 import bcrypt from 'bcryptjs'
 
 export async function POST(request) {
@@ -30,11 +30,11 @@ export async function POST(request) {
       )
     }
 
-    // Check if user already exists
-    const { rows: existingUsers } = await pool.query(
-      'SELECT id FROM users WHERE email = $1',
-      [email.toLowerCase()]
-    )
+    // Check if user already exists using serverless syntax
+    const existingUsers = await sql`
+      SELECT id FROM users 
+      WHERE email = ${email.toLowerCase()}
+    `
 
     if (existingUsers.length > 0) {
       return Response.json(
@@ -47,13 +47,12 @@ export async function POST(request) {
     const saltRounds = 12
     const password_hash = await bcrypt.hash(password, saltRounds)
 
-    // Insert new user into database
-    const { rows: newUser } = await pool.query(
-      `INSERT INTO users (name, email, password_hash, phone, address, role) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
-       RETURNING id, name, email, phone, role, created_at`,
-      [name.trim(), email.toLowerCase(), password_hash, phone || null, address || null, 'customer']
-    )
+    // Insert new user into database using serverless syntax
+    const newUser = await sql`
+      INSERT INTO users (name, email, password_hash, phone, address, role) 
+      VALUES (${name.trim()}, ${email.toLowerCase()}, ${password_hash}, ${phone || null}, ${address || null}, 'customer') 
+      RETURNING id, name, email, phone, role, created_at
+    `
 
     // Return success response (don't include password_hash)
     return Response.json({
@@ -69,13 +68,26 @@ export async function POST(request) {
     }, { status: 201 })
 
   } catch (error) {
-    console.error('Signup error:', error)
+    console.error('Signup error:', {
+      message: error.message,
+      code: error.code,
+      detail: error.detail
+    })
     
-    // Handle specific database errors
-    if (error.code === '23505') { // Unique constraint violation
+    // Handle specific database errors for serverless driver
+    if (error.message?.includes('duplicate key') || error.code === '23505') {
       return Response.json(
         { message: 'An account with this email already exists' },
         { status: 409 }
+      )
+    }
+
+    // Handle connection errors
+    if (error.message?.includes('fetch failed') || error.message?.includes('ENOTFOUND')) {
+      console.error('Database connection failed:', error)
+      return Response.json(
+        { message: 'Database connection error. Please try again.' },
+        { status: 503 }
       )
     }
 
