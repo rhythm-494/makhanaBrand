@@ -1,8 +1,8 @@
 import HeroSection from '../components/Hero/HeroSection'
 import ProductsSection from '../components/products/ProductsSection'
 import CategoriesSection from '../components/categories/CategoriesSection'
-import TestimonialsSection from '../components/testimonials/TestimonialsSection'
-import NewsletterSection from '../components/newsletter/NewsletterSection'
+// import TestimonialsSection from '../components/testimonials/TestimonialsSection'
+// import NewsletterSection from '../components/newsletter/NewsletterSection'
 
 import { productService } from '../services/database/productService'
 import { categoryService } from '../services/database/categoryService'
