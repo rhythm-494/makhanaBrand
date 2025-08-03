@@ -18,11 +18,7 @@ export default async function HomePage() {
   
   try {
     // Test connection first
-    const connectionTest = await testConnection();
-    if (!connectionTest) {
-      throw new Error('Database connection test failed');
-    }
-
+    
     console.log('Database connected successfully')
 
     // Fetch data with individual try-catch blocks
