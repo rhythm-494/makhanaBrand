@@ -1,13 +1,10 @@
-// src/app/api/auth/[...nextauth]/route.js
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import GoogleProvider from 'next-auth/providers/google'
-import pool from '../../../../lib/db'
+import sql from '../../../../lib/db'
 import bcrypt from 'bcryptjs'
 
 const handler = NextAuth({
   providers: [
-    // Email/Password Authentication
     CredentialsProvider({
       name: 'credentials',
       credentials: {
@@ -15,24 +12,22 @@ const handler = NextAuth({
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null
+        }
+
         try {
-          if (!credentials?.email || !credentials?.password) {
+          const users = await sql`
+            SELECT id, name, email, password_hash, role 
+            FROM users 
+            WHERE email = ${credentials.email.toLowerCase()}
+          `
+
+          if (!users || users.length === 0) {
             return null
           }
 
-          // Find user in database
-          const { rows } = await pool.query(
-            'SELECT id, name, email, password_hash, role FROM users WHERE email = $1',
-            [credentials.email]
-          )
-
-          if (rows.length === 0) {
-            return null
-          }
-
-          const user = rows[0]
-
-          // Verify password
+          const user = users[0]
           const isValidPassword = await bcrypt.compare(
             credentials.password, 
             user.password_hash
@@ -53,12 +48,6 @@ const handler = NextAuth({
           return null
         }
       }
-    }),
-
-    // Google Authentication (optional)
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     })
   ],
 
@@ -69,45 +58,25 @@ const handler = NextAuth({
       }
       return token
     },
+    
     async session({ session, token }) {
-      session.user.id = token.sub
-      session.user.role = token.role
-      return session
-    },
-    async signIn({ user, account, profile }) {
-      // Handle Google sign-in - create user in database if needed
-      if (account.provider === 'google') {
-        try {
-          const { rows } = await pool.query(
-            'SELECT id FROM users WHERE email = $1',
-            [user.email]
-          )
-
-          if (rows.length === 0) {
-            // Create new user for Google sign-in
-            await pool.query(
-              'INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4)',
-              [user.name, user.email, 'google_auth', 'customer']
-            )
-          }
-          return true
-        } catch (error) {
-          console.error('Google sign-in error:', error)
-          return false
-        }
+      if (token) {
+        session.user.id = token.sub
+        session.user.role = token.role
       }
-      return true
+      return session
     }
   },
 
   pages: {
     signIn: '/auth/login',
-    signUp: '/auth/register',
   },
 
   session: {
     strategy: 'jwt'
-  }
+  },
+
+  secret: process.env.NEXTAUTH_SECRET,
 })
 
 export { handler as GET, handler as POST }
